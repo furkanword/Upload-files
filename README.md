@@ -1,107 +1,4 @@
 
-# 🧠  Upload Files  🧠 
-se centra en crear una forma eficiente y segura para que los usuarios suban archivos a una plataforma en línea, ya sea para compartir documentos, imágenes, videos u otros tipos de archivos
-## Estructura
-
-**APi:** Controller, Dtos, Extensions, Helpers, profiles, services, Uploads
-
-**Aplicacion:** Repository, UnitOfWork
-
-**Dominio:** Entities, Interfaces
-
-**Persistencia:** Configuration, Migrations, Context
-
-
-
-
-```c# 
-
-😄 Entitie
-
-namespace Dominio.Entities;
-public class UploadResult : BaseEntity
-{
-
-    public string FileName { get; set; }
-    public string  StoredFileName { get; set; }  
-
-}
-
-🤔 Context
-
-namespace Persistencia
-{
-    public class DbAppContext : DbContext
-    {
-        public DbAppContext(DbContextOptions options) : base(options)
-        {
-        }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        }
-         public DbSet<Rol> Roles { get; set; }
-        public DbSet<Usuario> Usuarios { get; set; }
-        public DbSet<UsuarioRoles> UsuariosRoles { get; set; }
-        public DbSet<UploadResult> UploadResults { get; set; }
-    }
-}
-
-
-🧠 Config
-
-namespace Persistencia.Data.Configuration;
-public class UploadResultConfiguration : IEntityTypeConfiguration<UploadResult>
-{
-    public void Configure(EntityTypeBuilder<UploadResult> builder)
-    {
-        builder.ToTable("UploadResults");
-
-        builder.Property(p => p.Id)
-        .IsRequired();
-
-        builder.Property(p => p.FileName)
-        .HasMaxLength(150);
-
-        builder.Property(p => p.StoredFileName)
-        .HasMaxLength(150);
-    }
-}
-
-⚡️MappingProfile
-
-
-namespace API.Profiles;
-public class MappingProfiles : Profile
-{
-    public MappingProfiles()
-    {
-        //aqui va el mapeo de los Dtos a las entidades de la Db
-        CreateMap<Rol, AddRoleDto>().ReverseMap();
-        CreateMap<UploadResult, UploadRestoreDto>().ReverseMap();
-    }
-
-}
-
-
-😄 BaseApiController
-
-using Microsoft.AspNetCore.Mvc;
-
-
-namespace API.Controllers;
-[ApiController]
-[Route("[controller]")]
-public class BaseApiController : ControllerBase
-{
-
-}
-
-
-
-
 Settings
 
 {
@@ -141,6 +38,23 @@ appsettings.Development
     "ConexMysql":"server=localhost;user=root;database=Upload-data"
   }
 }
+
+
+🧠 "ConnectionStrings": Define las cadenas de conexión a bases de datos,tanto para SQL Server como para MySQL.
+ Esto permite que la aplicación se conecte a estas bases de datos utilizando estas cadenas de conexión.
+
+
+🧠 "Logging": Establece el nivel de registro para diferentes componentes de la aplicación.
+ En este caso, el nivel de registro predeterminado es "Information",
+  pero se reduce a "Warning" para los componentes de Microsoft.AspNetCore.
+
+
+🧠 "AllowedHosts": Permite que la aplicación sea accesible desde cualquier host. Esto es útil durante el desarrollo,
+ pero se debe configurar adecuadamente en un entorno de producción para aumentar la seguridad.
+
+
+🧠 "JWT": Configura la autenticación y autorización mediante tokens JWT. Define la clave, el emisor,
+ la audiencia y la duración de los tokens JWT utilizados en la aplicación.
 
 Go to the project directory
 
@@ -232,6 +146,36 @@ namespace API.Controllers
         }
     }
 }
+
+🧠 Constructor: En el constructor, se inyecta una instancia de IWebHostEnvironment (que proporciona información sobre el entorno de alojamiento de la aplicación)
+ y una instancia de IMapper (utilizada para mapear objetos). Esto permite acceder al entorno de alojamiento y al mapeo de objetos dentro del controlador.
+
+🧠 Método PostUploadFile: Este método se invoca cuando se realiza una solicitud HTTP POST en la ruta del controlador. 
+Acepta una lista de archivos (formFiles) como entrada. Aquí está el flujo de trabajo:
+
+⚡️ Se crea un directorio paraalmacenar los archivos cargados si aún no existe.
+
+⚡️ Se inicializa una lista de objetos UploadRestoreDto para almacenar información sobre los archivos cargados.
+
+⚡️ Se itera a través de la lista de archivos cargados. Para cada archivo, se realiza lo siguiente:
+
+⚡️ Se crea un objeto UploadRestoreDto para mantener información sobre el archivo.
+
+⚡️ Se obtiene el nombre original del archivo.
+
+⚡️ Se codifica el nombre original del archivo para su visualización.
+
+⚡️ Se genera un nombre aleatorio para el archivo cargado para evitar sobrescribir archivos existentes.
+
+⚡️ Se crea una ruta de archivo donde se guardará el archivo.
+
+⚡️ Se crea y guarda el archivo en la ubicación especificada.
+
+⚡️ Se agrega el nombre del archivo almacenado en el objeto UploadRestoreDto.
+
+⚡️ Se agrega el objeto UploadRestoreDto a la lista.
+
+⚡️ Se devuelve la lista de objetos UploadRestoreDto mapeados a una lista de la misma forma mediante AutoMapper.
 
   
 ```
