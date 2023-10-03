@@ -10,6 +10,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
 {
     RolRepository _rol;
     UsuarioRepository _usuario;
+     private UsuariosRolesRepository  _usuariosRoles;
     private readonly DbAppContext _context;
     public UnitOfWork(DbAppContext context)
     {
@@ -24,6 +25,17 @@ public class UnitOfWork : IUnitOfWork, IDisposable
                 return _usuario;
             }
             return _usuario = new UsuarioRepository(_context);
+        }
+    }
+    public IUsuariosRoles UsuariosRoles
+    {
+        get
+        {
+            if (_usuario is not null)
+            {
+                return _usuariosRoles;
+            }
+            return _usuariosRoles = new UsuariosRolesRepository(_context);
         }
     }
     public IRol Roles

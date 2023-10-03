@@ -1,6 +1,8 @@
+using System.Reflection;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Errors;
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Persistencia;
@@ -31,8 +33,11 @@ builder.Services.AddValidationErrors();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.ConfigureCors();
+builder.Services.ConfigureRateLimiting();
+builder.Services.ConfigureApiVersioning(); 
+builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
+
 
 builder.Services.AddJwt(builder.Configuration);
 
@@ -51,9 +56,9 @@ builder.Services.AddDbContext<DbAppContext>(options =>
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -76,6 +81,7 @@ using (var scope = app.Services.CreateScope())
         _logger.LogError(ex, "Ocurrio un error durante la migracion");
     }
 }
+app.UseIpRateLimiting();
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();

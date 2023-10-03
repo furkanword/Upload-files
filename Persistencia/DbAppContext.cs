@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Dominio.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,5 +18,6 @@ namespace Persistencia
          public DbSet<Rol> Roles { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<UsuarioRoles> UsuariosRoles { get; set; }
+        public DbSet<UploadResult> UploadResults { get; set; }
     }
 }
