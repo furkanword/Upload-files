@@ -1,4 +1,142 @@
 
+# 🧠  Upload Files  🧠 
+se centra en crear una forma eficiente y segura para que los usuarios suban archivos a una plataforma en línea, ya sea para compartir documentos, imágenes, videos u otros tipos de archivos
+## Estructura
+
+**APi:** Controller, Dtos, Extensions, Helpers, profiles, services, Uploads
+
+**Aplicacion:** Repository, UnitOfWork
+
+**Dominio:** Entities, Interfaces
+
+**Persistencia:** Configuration, Migrations, Context
+
+
+
+
+```c# 
+
+😄 Entitie
+
+namespace Dominio.Entities;
+public class UploadResult : BaseEntity
+{
+
+    public string FileName { get; set; }
+    public string  StoredFileName { get; set; }  
+
+}
+
+
+🧠El código proporcionado define una clase llamada UploadResult
+ en el espacio de nombres Dominio.Entities. Esta clase tiene dos propiedades públicas, FileName y StoredFileName, que almacenan nombres de archivo.
+Además, hereda de una clase llamada BaseEntity, lo que sugiere la posibilidad de compartir funcionalidad común con otras clases en el proyecto. 
+En resumen, UploadResult parece formar parte de un sistema de manejo de archivos,
+almacenando información sobre nombres de archivos antes y después de algún procesamiento o almacenamiento,
+y aprovechando características de la clase base BaseEntity.
+
+
+😄 Context
+
+namespace Persistencia
+{
+    public class DbAppContext : DbContext
+    {
+        public DbAppContext(DbContextOptions options) : base(options)
+        {
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        }
+         public DbSet<Rol> Roles { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<UsuarioRoles> UsuariosRoles { get; set; }
+        public DbSet<UploadResult> UploadResults { get; set; }
+    }
+}
+
+
+🧠 DbAppContext es una clase que proporciona un contexto de base de datos para interactuar con una base de datos en una aplicación,
+y está configurada para trabajar con las entidades Rol, Usuario, UsuarioRoles y UploadResult.
+Esta clase es esencial para realizar operaciones de lectura y escritura en la base de datos utilizando Entity Framework en C#.
+
+
+😄 Config
+
+namespace Persistencia.Data.Configuration;
+public class UploadResultConfiguration : IEntityTypeConfiguration<UploadResult>
+{
+    public void Configure(EntityTypeBuilder<UploadResult> builder)
+    {
+        builder.ToTable("UploadResults");
+
+        builder.Property(p => p.Id)
+        .IsRequired();
+
+        builder.Property(p => p.FileName)
+        .HasMaxLength(150);
+
+        builder.Property(p => p.StoredFileName)
+        .HasMaxLength(150);
+    }
+}
+
+
+🧠 El código proporcionado define una clase llamada UploadResultConfiguration que configura cómo se mapea la clase UploadResult a una tabla en una base de datos.
+Esto se hace utilizando Entity Framework en C#. En resumen, esta clase establece detalles como el nombre de la tabla en la base de datos ("UploadResults")
+y las restricciones de longitud para las propiedades FileName y StoredFileName al mapearlas a columnas en la tabla.
+Esta configuración ayuda a definir cómo se almacenarán los datos de la clase UploadResult en la base de datos.
+
+
+
+😄 MappingProfile
+
+
+namespace API.Profiles;
+public class MappingProfiles : Profile
+{
+    public MappingProfiles()
+    {
+        //aqui va el mapeo de los Dtos a las entidades de la Db
+        CreateMap<Rol, AddRoleDto>().ReverseMap();
+        CreateMap<UploadResult, UploadRestoreDto>().ReverseMap();
+    }
+
+}
+
+
+🧠 MappingProfiles se utiliza para definir cómo se deben mapear los datos entre objetos de diferentes tipos,
+ facilitando la transferencia de información entre las entidades de la base de datos y los objetos DTO en la aplicación.
+Esto es especialmente útil en el contexto de APIs web donde se reciben y envían datos en diferentes formatos y estructuras.
+
+
+😄 BaseApiController
+
+using Microsoft.AspNetCore.Mvc;
+
+
+namespace API.Controllers;
+[ApiController]
+[Route("[controller]")]
+public class BaseApiController : ControllerBase
+{
+
+}
+
+
+🧠 [ApiController]: A través de este atributo, la clase BaseApiController indica que es un controlador API,lo que significa que se espera que 
+maneje solicitudes HTTP y devuelva respuestas en formato JSON automáticamente. Simplifica la creación de API web.
+
+🧠 [Route("[controller]")]: Este atributo establece una ruta base para el controlador,
+ donde [controller] se reemplazará automáticamente por el nombre del controlador. Por ejemplo,
+  si se crea un controlador derivado de BaseApiController llamado EjemploController, la ruta base será "/Ejemplo".
+
+
+
+
 Settings
 
 {
